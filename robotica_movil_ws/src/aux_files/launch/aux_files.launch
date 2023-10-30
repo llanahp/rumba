@@ -1,0 +1,35 @@
+<launch>
+	
+	<node pkg="aux_files" type="local_odom" name="local_odom" >
+	<!--remap from="tf" to="tf_new"/> -->
+	<param name="error_x" value="0.0"/>
+	<param name="error_y" value="0.0"/>
+	<param name="error_a" value="0.0"/>
+	</node>
+
+	<node name="tf_repub" pkg="aux_files" type="tf_repub">
+	<rosparam param="polling_frequency">100.0</rosparam>
+        <rosparam param="frame_pairs">
+        - source_frame: robot0_laser_1
+          target_frame: robot0
+        - source_frame: robot0_sonar_0
+          target_frame: robot0
+        - source_frame: robot0_sonar_1
+          target_frame: robot0
+        - source_frame: robot0_sonar_2
+          target_frame: robot0
+        - source_frame: robot0_sonar_3
+          target_frame: robot0
+        - source_frame: robot0_sonar_4
+          target_frame: robot0
+        - source_frame: robot0_sonar_5
+          target_frame: robot0
+        - source_frame: robot0_sonar_6
+          target_frame: robot0
+        - source_frame: robot0_sonar_7
+          target_frame: robot0
+        </rosparam>
+	<remap from="tf" to="tf_sim" />
+	<remap from="tf_changes" to="tf" />
+	</node>
+</launch>

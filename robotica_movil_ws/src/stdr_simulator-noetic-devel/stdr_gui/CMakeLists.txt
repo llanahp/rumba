@@ -1,0 +1,137 @@
+cmake_minimum_required(VERSION 3.2.0)
+project(stdr_gui)
+
+#set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
+
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  roslib
+  tf
+  stdr_msgs
+  stdr_server
+  stdr_robot
+  stdr_parser
+  sensor_msgs
+  nav_msgs
+)
+
+include_directories( include
+  ${catkin_INCLUDE_DIRS}
+)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+if (POLICY CMP0071)
+    cmake_policy(SET CMP0071 OLD)
+endif()
+
+#Fix Core Discovery something is fishy
+find_package(Qt5 COMPONENTS
+  Core
+  Widgets
+  UiTools
+REQUIRED)
+
+include_directories(
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+catkin_package(
+  CATKIN_DEPENDS
+    roscpp
+    roslib
+    tf
+    stdr_msgs
+    stdr_server
+    stdr_robot
+    stdr_parser
+    sensor_msgs
+    nav_msgs
+  #INCLUDE_DIRS
+  #LIBRARIES
+)
+
+#----------------------------------------------------------------------------------------------------#
+set(QT_FORMS
+  ui/information.ui             ui/kinematicProperties.ui
+  ui/laserProperties.ui         ui/laserVisualization.ui
+  ui/map.ui                     ui/rfidAntennaProperties.ui
+  ui/robotCreator.ui            ui/robotFootprint.ui
+  ui/robotProperties.ui         ui/robotVisualization.ui
+  ui/simulator.ui               ui/sonarProperties.ui
+  ui/sonarVisualization.ui      ui/co2SensorProperties.ui
+  ui/thermalSensorProperties.ui ui/soundSensorProperties.ui
+)
+
+QT5_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
+
+QT_WRAP_CPP(stdr_gui_node SAMPLE_MOC_SRCS include/stdr_gui/stdr_gui_controller.h)
+QT_WRAP_CPP(stdr_gui_node SAMPLE_MOC_SRCS include/stdr_gui/stdr_gui_connector.h)
+QT_WRAP_CPP(stdr_gui_node SAMPLE_MOC_SRCS include/stdr_gui/stdr_info_connector.h)
+QT_WRAP_CPP(stdr_gui_node SAMPLE_MOC_SRCS include/stdr_gui/stdr_map_connector.h)
+QT_WRAP_CPP(stdr_gui_node SAMPLE_MOC_SRCS include/stdr_gui/stdr_robot_creator/stdr_robot_creator_connector.h)
+
+#----------------------------------------------------------------------------------------------------#
+
+add_executable(stdr_gui_node
+  src/stdr_gui/stdr_gui_node.cpp
+  src/stdr_gui/stdr_gui_application.cpp
+  src/stdr_gui/stdr_gui_connector.cpp
+  src/stdr_gui/stdr_gui_loader.cpp
+  src/stdr_gui/stdr_gui_controller.cpp
+  src/stdr_gui/stdr_info_connector.cpp
+  src/stdr_gui/stdr_info_loader.cpp
+  src/stdr_gui/stdr_map_connector.cpp
+  src/stdr_gui/stdr_map_loader.cpp
+  src/stdr_gui/stdr_tools.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_kinematic_properties_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_laser_properties_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_sonar_properties_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_robot_properties_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_robot_footprint_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_rfid_antenna_properties_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_co2_sensor_properties_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_thermal_sensor_properties_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_sound_sensor_properties_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_robot_creator_loader.cpp
+  src/stdr_gui/stdr_robot_creator/stdr_robot_creator_connector.cpp
+  src/stdr_gui/stdr_gui_sensors/stdr_gui_robot.cpp
+  src/stdr_gui/stdr_gui_sensors/stdr_gui_laser.cpp
+  src/stdr_gui/stdr_gui_sensors/stdr_gui_sonar.cpp
+  src/stdr_gui/stdr_gui_sensors/stdr_gui_rfid.cpp
+  src/stdr_gui/stdr_gui_sensors/stdr_gui_co2.cpp
+  src/stdr_gui/stdr_gui_sensors/stdr_gui_thermal.cpp
+  src/stdr_gui/stdr_gui_sensors/stdr_gui_sound.cpp
+  src/stdr_gui/stdr_visualization/stdr_laser_visualization.cpp
+  src/stdr_gui/stdr_visualization/stdr_sonar_visualization.cpp
+  src/stdr_gui/stdr_visualization/stdr_robot_visualization.cpp
+  src/stdr_gui/stdr_map_metainformation/stdr_gui_source.cpp
+  src/stdr_gui/stdr_map_metainformation/stdr_gui_co2_source.cpp
+  src/stdr_gui/stdr_map_metainformation/stdr_gui_thermal_source.cpp
+  src/stdr_gui/stdr_map_metainformation/stdr_gui_rfid_tag.cpp
+  src/stdr_gui/stdr_map_metainformation/stdr_gui_sound_source.cpp
+  ${QT_FORMS_HPP}
+  ${SAMPLE_MOC_SRCS}
+)
+add_dependencies(stdr_gui_node ${stdr_msgs_EXPORTED_TARGETS})  # Wait for stdr_msgs to build
+target_link_libraries(stdr_gui_node
+  ${catkin_LIBRARIES}
+  Qt5::Core
+  Qt5::Widgets
+  Qt5::UiTools
+)
+
+# Install launch files
+install(DIRECTORY launch resources
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+# Install excecutables
+install(TARGETS stdr_gui_node
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

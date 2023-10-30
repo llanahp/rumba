@@ -1,0 +1,8 @@
+prefix=/home/alumno/robotica_movil_ws/devel
+
+Name: aux_files
+Description: Description of aux_files
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

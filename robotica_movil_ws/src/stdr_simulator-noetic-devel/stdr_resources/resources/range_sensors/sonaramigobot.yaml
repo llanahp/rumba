@@ -1,0 +1,15 @@
+sonar:
+  sonar_specifications:
+    cone_angle: 0.2617994
+    max_range: 5
+    min_range: 0.1
+    frequency: 10
+    frame_id: sonar_1
+    pose:
+      x: 0.07599999755620956
+      y: 0.1000000014901161
+      theta: 1.570796326795
+    noise:
+      noise_specifications:
+        noise_mean: 0
+        noise_std: 0

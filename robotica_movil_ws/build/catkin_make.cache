@@ -1,0 +1,2 @@
+aux_files:stdr_simulator-noetic-devel/stdr_gui:stdr_simulator-noetic-devel/stdr_launchers:stdr_simulator-noetic-devel/stdr_msgs:stdr_simulator-noetic-devel/stdr_parser:stdr_simulator-noetic-devel/stdr_resources:stdr_simulator-noetic-devel/stdr_robot:stdr_simulator-noetic-devel/stdr_samples:stdr_simulator-noetic-devel/stdr_server:stdr_simulator-noetic-devel/stdr_simulator
+-DCATKIN_DEVEL_PREFIX=/home/alumno/robotica_movil_ws/devel -DCMAKE_INSTALL_PREFIX=/home/alumno/robotica_movil_ws/install -G Unix Makefiles
