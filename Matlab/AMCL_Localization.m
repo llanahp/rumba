@@ -1,4 +1,4 @@
-load mat/map_modified_pasillo_lab.mat
+load mat/mi_mapa.mat
 show(map_modified);
 
 
