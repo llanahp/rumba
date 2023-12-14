@@ -75,7 +75,7 @@ visualizationHelper = ExampleHelperAMCLVisualization(map);
 
 %TODO Crear el objeto PurePursuit y ajustar sus propiedades
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-controller=controllerPurePursuit;
+controller=CONTROLLER=controllerPurePursuit;
 controller.LookaheadDistance = 0.1;
 controller.DesiredLinearVelocity=3;
 controller.MaxAngularVelocity =0.5;
@@ -174,6 +174,7 @@ figure; show(plan_nodos);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 controller.Waypoints = ruta;
 
+
 while(1)
 
     % Leer el láser y la odometría
@@ -196,6 +197,7 @@ while(1)
     end
 
     %TODO Ejecutar el controlador PurePursuit para obtener las velocidades lineal y angular
+    
     [lin_vel,ang_vel] = CONTROLLER(estimatedPose);
 
     %Corregir velocidad angular con el VFH
