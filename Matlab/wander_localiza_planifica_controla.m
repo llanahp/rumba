@@ -1,5 +1,4 @@
-close all
-
+close all;
 
 
 fig_laser=figure; title('LASER')
@@ -74,9 +73,9 @@ visualizationHelper = ExampleHelperAMCLVisualization(map);
 %TODO Crear el objeto PurePursuit y ajustar sus propiedades
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 controller=controllerPurePursuit;
-controller.LookaheadDistance = 0.1;
-controller.DesiredLinearVelocity=3;
-controller.MaxAngularVelocity =0.5;
+controller.LookaheadDistance = 0.5;
+controller.DesiredLinearVelocity=0.3;
+controller.MaxAngularVelocity =0.4;
 
 
 
@@ -109,7 +108,8 @@ while(1)
     umbralyaw = 0.01;
 
     if (estimatedCovariance(1,1)<umbralx && estimatedCovariance(2,2)<umbraly && estimatedCovariance(3,3)<umbralyaw)
-        disp(estimatedCovariance)
+        disp(estimatedCovariance);
+        disp(estimatedPose);
         disp('Robot Localizado');
         break;
     end
@@ -160,8 +160,8 @@ inflate(cpMap,0.25);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 planner = mobileRobotPRM;
 planner.Map = cpMap
-planner.NumNodes = 1000;
-planner.ConnectionDistance = 3;
+planner.NumNodes = 2000;
+planner.ConnectionDistance = 2;
 
 endLocation = [12.5 7.5];
 
@@ -196,22 +196,18 @@ while(1)
 
     %Dibujar los resultados del localizador con el visualizationHelper
     if isUpdated
-        i = i + 1
+        i = i + 1;
         plotStep(visualizationHelper, amcl, estimatedPose, scans, i)
     end
 
     %TODO Ejecutar el controlador PurePursuit para obtener las velocidades lineal y angular
     
-    [lin_vel,ang_vel] = CONTROLLER(estimatedPose);
+    [lin_vel,ang_vel] = controller(estimatedPose);
 
-    %Corregir velocidad angular con el VFH
-    targetdir=K1*ang_vel;
-    direccion=VFH(scan,targetdir);
-    ang_vel_vfh=K2*direccion;
 
     %Rellenar los campos del mensaje de velocidad
     msg_vel.Linear.X = lin_vel;
-    msg_vel.Angular.Z = ang_vel+ang_vel_vfh;
+    msg_vel.Angular.Z = ang_vel;
 
     %Publicar el mensaje de velocidad
     send(pub_vel,msg_vel);
@@ -219,9 +215,9 @@ while(1)
     %Comprobar si hemos llegado al destino, calculando la distancia euclidea
     % y estableciendo un umbral
 
-    Umbral_X = 0.01;
-    Umbral_Y = 0.01;
-    if (estimatedPose.x<Umbral_X && estimatedPose.y<Umbral_Y)
+    Umbral_X = 0.1;
+    Umbral_Y = 0.1;
+    if (abs(12.5 - estimatedPose(1,1))<Umbral_X && abs(estimatedPose(1,2)-7.5)<Umbral_Y)
         disp('Done!!!!');
         break;
     end
@@ -229,3 +225,11 @@ while(1)
     %Esperar al siguiente periodo de muestreo
     waitfor(r);
 end
+
+msg_vel.Linear.X=0;
+msg_vel.Linear.Y=0;
+msg_vel.Linear.Z=0;
+msg_vel.Angular.X=0;
+msg_vel.Angular.Y=0;
+msg_vel.Angular.Z=0;
+send(pub_vel,msg_vel);
