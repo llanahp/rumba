@@ -73,7 +73,7 @@ visualizationHelper = ExampleHelperAMCLVisualization(map);
 
 %TODO Crear el objeto PurePursuit y ajustar sus propiedades
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-controller=CONTROLLER=controllerPurePursuit;
+controller=controllerPurePursuit;
 controller.LookaheadDistance = 0.1;
 controller.DesiredLinearVelocity=3;
 controller.MaxAngularVelocity =0.5;
@@ -172,7 +172,7 @@ startLocation = [odompose.Pose.Pose.Position.X odompose.Pose.Pose.Position.Y];
 %Obtener la ruta hacia el destino desde la posición actual del robot y mostrarla
 %en una figura
 ruta = findpath(planner,startLocation,endLocation);
-figure; show(plan_nodos);
+figure; show(planner);
 
 % Indicamos al controlador la lista de waypoints a recorrer (ruta)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
