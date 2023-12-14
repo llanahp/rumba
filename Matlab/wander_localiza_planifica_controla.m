@@ -1,8 +1,6 @@
 close all
 
-x = 15;
-y = 10;
-endLocation = [x y];
+
 
 fig_laser=figure; title('LASER')
 set(fig_laser,'Position',[50 50 800 400])
@@ -162,8 +160,14 @@ inflate(cpMap,0.25);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 planner = mobileRobotPRM;
 planner.Map = cpMap
-planner.NumNodes = 50; 
-planner.ConnectionDistance = 2; 
+planner.NumNodes = 1000;
+planner.ConnectionDistance = 3;
+
+endLocation = [12.5 7.5];
+
+
+startLocation = [odompose.Pose.Pose.Position.X odompose.Pose.Pose.Position.Y];
+
 
 %Obtener la ruta hacia el destino desde la posición actual del robot y mostrarla
 %en una figura

@@ -1,10 +1,6 @@
 close all
 
 
-x = 15;
-y = 10;
-endLocation = [x y];
-
 fig_laser=figure; title('LASER')
 set(fig_laser,'Position',[50 50 800 400])
 fig_vfh=figure; title('VFH')
@@ -108,6 +104,7 @@ while(1)
 
     if (estimatedCovariance(1,1)<umbralx && estimatedCovariance(2,2)<umbraly && estimatedCovariance(3,3)<umbralyaw)
         disp(estimatedCovariance)
+        disp(estimatedPose)
         disp('Robot Localizado');
         break;
     end
@@ -154,14 +151,19 @@ send(pub_vel,msg_vel);
 cpMap = copy(map);
 inflate(cpMap,0.25);
 
+
 %Crear el objeto PRM y ajustar sus parámetros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 planner = mobileRobotPRM;
 planner.Map = cpMap
-planner.NumNodes = 50; %TODO cambiar el numero para encontrar el optimo 
-planner.ConnectionDistance = 2; %TODO cambiar el numero para encontrar el optimo
+planner.NumNodes = 1000;
+planner.ConnectionDistance = 3;
 
 %Obtener la ruta hacia el destino desde la posición actual del robot y mostrarla
 %en una figura
+endLocation = [12.5 7.5];
+
+startLocation = [odompose.Pose.Pose.Position.X odompose.Pose.Pose.Position.Y];
+
 ruta = findpath(planner,startLocation,endLocation);
-figure; show(plan_nodos);
+figure; show(planner);
