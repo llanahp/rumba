@@ -1,6 +1,5 @@
 close all
 
-
 x = 15;
 y = 10;
 endLocation = [x y];
@@ -74,7 +73,12 @@ amcl.InitialCovariance = eye(3)*0.5; % Covariance of initial pose
 
 visualizationHelper = ExampleHelperAMCLVisualization(map);
 
-
+%TODO Crear el objeto PurePursuit y ajustar sus propiedades
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+controller=controllerPurePursuit;
+controller.LookaheadDistance = 0.1;
+controller.DesiredLinearVelocity=3;
+controller.MaxAngularVelocity =0.5;
 
 
 
@@ -158,10 +162,59 @@ inflate(cpMap,0.25);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 planner = mobileRobotPRM;
 planner.Map = cpMap
-planner.NumNodes = 50; %TODO cambiar el numero para encontrar el optimo 
-planner.ConnectionDistance = 2; %TODO cambiar el numero para encontrar el optimo
+planner.NumNodes = 50; 
+planner.ConnectionDistance = 2; 
 
 %Obtener la ruta hacia el destino desde la posición actual del robot y mostrarla
 %en una figura
 ruta = findpath(planner,startLocation,endLocation);
 figure; show(plan_nodos);
+
+% Indicamos al controlador la lista de waypoints a recorrer (ruta)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+controller.Waypoints = ruta;
+
+while(1)
+
+    % Leer el láser y la odometría
+    scan = receive(sub_laser);
+    scans = lidarScan(scan);
+
+    %Obtener la posición pose=[x,y,yaw] a partir de la odometría anterior
+    odompose = sub_odom.LatestMessage;
+    odomQuat = [odompose.Pose.Pose.Orientation.W, odompose.Pose.Pose.Orientation.X, odompose.Pose.Pose.Orientation.Y, odompose.Pose.Pose.Orientation.Z];
+    odomRotation = quat2eul(odomQuat);
+    pose = [odompose.Pose.Pose.Position.X, odompose.Pose.Pose.Position.Y odomRotation(1)];
+
+    % Ejecutar amcl para obtener la posición estimada estimatedPose
+    [isUpdated,estimatedPose, estimatedCovariance] = amcl(pose, scans);
+
+    %Dibujar los resultados del localizador con el visualizationHelper
+    if isUpdated
+        i = i + 1
+        plotStep(visualizationHelper, amcl, estimatedPose, scans, i)
+    end
+
+    %TODO Ejecutar el controlador PurePursuit para obtener las velocidades lineal y angular
+    [lin_vel,ang_vel]=CONTROLLER(estimatedPose);
+
+
+    %Rellenar los campos del mensaje de velocidad
+    msg_vel.Linear.X=lin_vel;
+    msg_vel.Angular.Z=ang_vel;
+
+    %Publicar el mensaje de velocidad
+    send(pub_vel,msg_vel);
+
+    %Comprobar si hemos llegado al destino, calculando la distancia euclidea
+    % y estableciendo un umbral
+
+    Umbral_X = 0.01;
+    Umbral_Y = 0.01;
+    if (estimatedPose.x<Umbral_X && estimatedPose.y<Umbral_Y)
+        break;
+    end
+
+    %Esperar al siguiente periodo de muestreo
+    waitfor(r);
+end
