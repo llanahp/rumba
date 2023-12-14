@@ -196,12 +196,16 @@ while(1)
     end
 
     %TODO Ejecutar el controlador PurePursuit para obtener las velocidades lineal y angular
-    [lin_vel,ang_vel]=CONTROLLER(estimatedPose);
+    [lin_vel,ang_vel] = CONTROLLER(estimatedPose);
 
+    %Corregir velocidad angular con el VFH
+    targetdir=K1*ang_vel;
+    direccion=VFH(scan,targetdir);
+    ang_vel_vfh=K2*direccion;
 
     %Rellenar los campos del mensaje de velocidad
-    msg_vel.Linear.X=lin_vel;
-    msg_vel.Angular.Z=ang_vel;
+    msg_vel.Linear.X = lin_vel;
+    msg_vel.Angular.Z = ang_vel+ang_vel_vfh;
 
     %Publicar el mensaje de velocidad
     send(pub_vel,msg_vel);
@@ -212,6 +216,7 @@ while(1)
     Umbral_X = 0.01;
     Umbral_Y = 0.01;
     if (estimatedPose.x<Umbral_X && estimatedPose.y<Umbral_Y)
+        disp('Done!!!!');
         break;
     end
 
