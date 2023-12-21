@@ -75,13 +75,13 @@ while(1)
     robotPose = [position, orientation(1)];
     
     % Extraer los rangos y los ángulos del mensaje del láser.
-    ranges = ...
-    angles = ...
+    ranges = msg_laser.Ranges;
+    angles = msg_laser.readScanAngles;
     ranges(isinf(ranges)) = 8;  %Eliminar datos infinitos
     
     % Insertar la medida del laser en el mapa utilizando 'insertRay',
     % pasandole los datos apropiados obtenidos anteriormente
-    insertRay(...);  %Es un método de la clase OccupancyGrid. Consular la ayuda.
+    insertRay(map, robotPose, ranges, angles, 8);  %Es un método de la clase OccupancyGrid. Consular la ayuda.
     
     % Visualizamos el mapa cada 50 actualizaciones.
     if ~mod(updateCounter,50)

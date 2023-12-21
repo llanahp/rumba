@@ -24,8 +24,9 @@ VFH.UseLidarScan=true; %para permitir utilizar la notación del scanç
 
 
 %fichero AMCL_Localization.m
-load mat/mi_mapa.mat
-show(map);
+% load mat/mi_mapa.mat
+load mat/map_modified_pasillo_lab.mat
+show(map_modified);
 
 
 odometryModel = odometryMotionModel;
@@ -33,7 +34,7 @@ odometryModel.Noise = [0.2 0.2 0.2 0.2];
 
 rangeFinderModel = likelihoodFieldSensorModel;
 rangeFinderModel.SensorLimits = [0 8];
-rangeFinderModel.Map = map;
+rangeFinderModel.Map = map_modified;
 
 tftree = rostf;
 %Obtener transformada entre los frames del robot y del sensor_laser
@@ -68,7 +69,7 @@ amcl.GlobalLocalization = false;      % global = true      local=false
 amcl.InitialPose = [0 0 0];              % Initial pose of vehicle   
 amcl.InitialCovariance = eye(3)*0.5; % Covariance of initial pose
 
-visualizationHelper = ExampleHelperAMCLVisualization(map);
+visualizationHelper = ExampleHelperAMCLVisualization(map_modified);
 
 %TODO Crear el objeto PurePursuit y ajustar sus propiedades
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -153,7 +154,7 @@ send(pub_vel,msg_vel);
 
 
 %Hacemos una copia del mapa, para “inflarlo” antes de planificar
-cpMap = copy(map);
+cpMap = copy(map_modified);
 inflate(cpMap,0.25);
 
 %Crear el objeto PRM y ajustar sus parámetros

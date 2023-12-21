@@ -24,7 +24,7 @@ VFH.UseLidarScan=true; %para permitir utilizar la notación del scanç
 
 
 %fichero AMCL_Localization.m
-load mat/map_modified_pasillo_lab.mat
+load mat/mi_mapa.mat
 show(map_modified);
 
 
@@ -34,41 +34,41 @@ odometryModel.Noise = [0.2 0.2 0.2 0.2];
 rangeFinderModel = likelihoodFieldSensorModel;
 rangeFinderModel.SensorLimits = [0 8];
 rangeFinderModel.Map = map_modified;
-
-tftree = rostf;
-%Obtener transformada entre los frames del robot y del sensor_laser
-waitForTransform(tftree,'/base_link','/laser_frame');
-sensorTransform = getTransform(tftree,'/base_link', '/laser_frame');
-
-% Get the euler rotation angles.
-laserQuat = [sensorTransform.Transform.Rotation.W sensorTransform.Transform.Rotation.X ...
-    sensorTransform.Transform.Rotation.Y sensorTransform.Transform.Rotation.Z];
-laserRotation = quat2eul(laserQuat, 'ZYX');
-
-% Setup the |SensorPose|, which includes the translation along base_link's
-% +X, +Y direction in meters and rotation angle along base_link's +Z axis
-% in radians.
-rangeFinderModel.SensorPose = ...
-    [sensorTransform.Transform.Translation.X sensorTransform.Transform.Translation.Y laserRotation(1)];
-
-amcl = monteCarloLocalization;
-amcl.UseLidarScan = true;
-%% 
-% Assign the |MotionModel| and |SensorModel| properties in the |amcl| object.
-
-amcl.MotionModel = odometryModel;
-amcl.SensorModel = rangeFinderModel;
-
-amcl.UpdateThresholds = [0.2,0.2,0.2];
-amcl.ResamplingInterval = 1;
-
-
-amcl.ParticleLimits =  [500 50000];           % Minimum and maximum number of particles
-amcl.GlobalLocalization = false;      % global = true      local=false
-amcl.InitialPose = [0 0 0];              % Initial pose of vehicle   
-amcl.InitialCovariance = eye(3)*0.5; % Covariance of initial pose
-
-visualizationHelper = ExampleHelperAMCLVisualization(map_modified);
+% 
+% tftree = rostf;
+% %Obtener transformada entre los frames del robot y del sensor_laser
+% waitForTransform(tftree,'/robot0','robot0_laser_1');
+% sensorTransform = getTransform(tftree,'/robot0', 'robot0_laser_1');
+% 
+% % Get the euler rotation angles.
+% laserQuat = [sensorTransform.Transform.Rotation.W sensorTransform.Transform.Rotation.X ...
+%     sensorTransform.Transform.Rotation.Y sensorTransform.Transform.Rotation.Z];
+% laserRotation = quat2eul(laserQuat, 'ZYX');
+% 
+% % Setup the |SensorPose|, which includes the translation along base_link's
+% % +X, +Y direction in meters and rotation angle along base_link's +Z axis
+% % in radians.
+% rangeFinderModel.SensorPose = ...
+%     [sensorTransform.Transform.Translation.X sensorTransform.Transform.Translation.Y laserRotation(1)];
+% 
+% amcl = monteCarloLocalization;
+% amcl.UseLidarScan = true;
+% %% 
+% % Assign the |MotionModel| and |SensorModel| properties in the |amcl| object.
+% 
+% amcl.MotionModel = odometryModel;
+% amcl.SensorModel = rangeFinderModel;
+% 
+% amcl.UpdateThresholds = [0.2,0.2,0.2];
+% amcl.ResamplingInterval = 1;
+% 
+% 
+% amcl.ParticleLimits =  [500 50000];           % Minimum and maximum number of particles
+% amcl.GlobalLocalization = false;      % global = true      local=false
+% amcl.InitialPose = [0 0 0];              % Initial pose of vehicle   
+% amcl.InitialCovariance = eye(3)*0.5; % Covariance of initial pose
+% 
+% visualizationHelper = ExampleHelperAMCLVisualization(map_modified);
 
 %TODO Crear el objeto PurePursuit y ajustar sus propiedades
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -88,7 +88,7 @@ controller.MaxAngularVelocity =0.4;
  msg_vel.Angular.Y=0;
 
 while(1)
-
+    
     scan = receive(sub_laser);
     scans = lidarScan(scan);
 
@@ -142,7 +142,7 @@ while(1)
 
 end
 
-Paramos el robot, para que no avance mientras planificamos
+%Paramos el robot, para que no avance mientras planificamos
 msg_vel.Linear.X=0;
 msg_vel.Linear.Y=0;
 msg_vel.Linear.Z=0;
@@ -155,7 +155,6 @@ send(pub_vel,msg_vel);
 %Hacemos una copia del mapa, para “inflarlo” antes de planificar
 cpMap = copy(map_modified);
 inflate(cpMap,0.25);
-show(cpMap)
 
 %Crear el objeto PRM y ajustar sus parámetros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -164,11 +163,10 @@ planner.Map = cpMap
 planner.NumNodes = 2000;
 planner.ConnectionDistance = 2;
 
-endLocation = [18 4.85];
+endLocation = [12.5 7.5];
 
 
-% startLocation = [odompose.Pose.Pose.Position.X odompose.Pose.Pose.Position.Y];
-startLocation = [0 0];
+startLocation = [odompose.Pose.Pose.Position.X odompose.Pose.Pose.Position.Y];
 
 
 %Obtener la ruta hacia el destino desde la posición actual del robot y mostrarla
@@ -198,8 +196,7 @@ VFH.UseLidarScan=true; %para permitir utilizar la notación del scanç
 while(1)
 
     % Leer el láser y la odometría
-    % scan = receive(sub_laser);
-    scan = sub_laser.LatestMessage;
+    scan = receive(sub_laser);
     scans = lidarScan(scan);
 
     %Obtener la posición pose=[x,y,yaw] a partir de la odometría anterior
